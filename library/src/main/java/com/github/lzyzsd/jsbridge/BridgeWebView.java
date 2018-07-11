@@ -13,6 +13,8 @@ import android.webkit.WebViewClient;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,7 +58,7 @@ public class BridgeWebView extends WebView implements WebViewJavascriptBridge {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param handler
 	 *            default handler,handle messages send by js without assigned handler name,
      *            if js message has handler name, it will be handled by named handlers registered by native
@@ -126,9 +128,9 @@ public class BridgeWebView extends WebView implements WebViewJavascriptBridge {
 
 	void dispatchMessage(Message m) {
         String messageJson = m.toJson();
-        //escape special characters for json string
-        messageJson = messageJson.replaceAll("(\\\\)([^utrn])", "\\\\\\\\$1$2");
-        messageJson = messageJson.replaceAll("(?<=[^\\\\])(\")", "\\\\\"");
+        //escape special characters for json string  为json字符串转义特殊字符
+		// 系统原生 API 做 Json转义，没必要自己正则替换，而且替换不一定完整
+        messageJson = JSONObject.quote(messageJson);
         String javascriptCommand = String.format(BridgeUtil.JS_HANDLE_MESSAGE_FROM_JAVA, messageJson);
         if (Thread.currentThread() == Looper.getMainLooper().getThread()) {
             this.loadUrl(javascriptCommand);
@@ -206,7 +208,7 @@ public class BridgeWebView extends WebView implements WebViewJavascriptBridge {
 
 	/**
 	 * register handler,so that javascript can call it
-	 * 
+	 *
 	 * @param handlerName
 	 * @param handler
 	 */
